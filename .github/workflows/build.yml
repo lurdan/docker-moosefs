@@ -1,0 +1,54 @@
+name: build Docker images
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: setup-buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: mfschunk
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: chunk
+          platforms: linux/amd64,linux/arm64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/mfschunk:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/mfschunk:latest
+
+      - name: mfsmetalogger
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: metalogger
+          platforms: linux/amd64,linux/arm64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/mfsmetalogger:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/mfsmetalogger:latest

@@ -1,0 +1,6 @@
+.env
+.dirkeep
+*.mfs
+.metaid
+*.lock
+metadata.*
